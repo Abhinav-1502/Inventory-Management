@@ -22,11 +22,19 @@ export const getUserByCreds = async (reqEmail, reqPassword) =>{
 }
 
 // Update request 
+export const updateUser = async (userData, userId) =>{
+    const user = await User.findById(userId);
+    if(!user){
+        throw new Error("User not found");
+    }else{
+        return await User.findByIdAndUpdate(userId, userData);
 
+    }
+}
 
 // Delete Request
-export const deleteUserByEmail = async (reqEmail) =>{
-    const user = await User.findOneAndDelete({email: reqEmail}).exec();
+export const deleteUserById = async (userId) =>{
+    const user = await User.findByIdAndDelete(userId).exec();
     if(!user){
         throw new Error("User doesn't exist");
     }
