@@ -8,4 +8,9 @@ router.post('/signup', userController.createUser);
 
 router.post('/signin', userController.loginUser);
 
+router.put('/:id', userController.putUser);
+
+router.delete('/:id', userController.deleteUser);
+
+
 export default router;
