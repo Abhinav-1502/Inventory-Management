@@ -51,7 +51,48 @@ export const getCat = async (isHierarchy, catId) =>{
 
 // Update category informaiton (decide if can be used when creating a child category)
 export const updateCat = async(catData, catId) => {
-    return null;
+    const oldCatData = await Category.findById(catId).exec();
+    if(!oldCatData){
+        throw new Error("Category not found");
+    }
+    
+    if(catData.name && oldCatData.name !== catData.name){
+        const existingCategory = await Category.findOne({name: catData.name});
+        if(existingCategory){
+            throw new Error("Another Category with the same name already exists");
+        }
+    }
+
+    let existingParent = null;
+    if(catData.parent && catData.parent !== oldCatData.parent){
+        existingParent = await Category.findById(catData.parent).exec();
+        if(!existingParent){
+            throw new Error("New Parent Category not found");
+        }
+
+        if(existingParent._id.equals(catId)){
+            throw new Error("A Category cannot be a parent to it's own");
+        }
+    }
+
+    oldCatData.name = catData.name || oldCatData.name;
+    oldCatData.description = catData.description || oldCatData.description;
+    
+    // Updating Parent
+    if(catData.parent && catData.parent !== oldCatData.parent){
+        //Updating new parent category
+        existingParent.children.push(catData.parent);
+        await existingParent.save();
+        // Updating old parent category
+        const oldParent = await Category.findById(oldCatData.parent).exec();;
+        if(oldParent){
+            oldParent.children = oldParent.children.filter(childId => !childId.equals(catId));
+            await oldParent.save();
+        }
+
+        oldCatData.parent = catData.parent;
+    }
+    return await oldCatData.save();
 }
 
 // Delete a category information 

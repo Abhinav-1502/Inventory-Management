@@ -46,9 +46,12 @@ export const getCategory = async(request, response) =>{
 // update cateogry 
 export const putCategory = async(request, response) =>{
     try{
-        
+        const id = request.params.id;
+        const {name, description, parent} = request.body;
+        const catData = await categoryServices.updateCat({name, description, parent}, id);
+        setResponse(catData, response, 200, "Category updated successfully");
     }catch(err){
-
+        setErrorResponse(err, response);
     }
 }
 
